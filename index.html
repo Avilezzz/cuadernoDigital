@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mis Pastelitos">
+<meta name="theme-color" content="#e879a0">
+<title>🧁 Mis Pastelitos</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  button,input,textarea,select{-webkit-appearance:none;appearance:none;touch-action:manipulation}
+  :root{
+    --rosa:#f9a8c9;--rosa-deep:#e879a0;--rosa-soft:#fde8f2;--rosa-card:#fff0f7;
+    --crema:#fff8f0;--crema-dark:#ffecd4;--texto:#5a2d41;--texto-light:#a06080;
+    --verde:#7bc67e;--verde-soft:#e8f5e9;--naranja:#ffb347;--naranja-soft:#fff3e0;
+    --rojo:#e57373;--rojo-soft:#fdecea;--morado:#b39ddb;--morado-soft:#ede7f6;
+    --shadow:0 4px 20px rgba(232,121,160,0.15);
+  }
+  body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#fde8f2 0%,#fff0f7 50%,#ffecd4 100%);min-height:100vh;min-height:-webkit-fill-available;color:var(--texto);padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+  
+  /* HEADER */
+  .header{background:linear-gradient(135deg,#e879a0,#f472b6,#f9a8c9);padding:20px 16px 28px;position:relative;overflow:hidden}
+  .header::before{content:'🧁';position:absolute;right:-10px;top:-10px;font-size:80px;opacity:0.15;transform:rotate(-15deg)}
+  .header::after{content:'✨';position:absolute;left:20px;top:8px;font-size:24px;opacity:0.6}
+  .header h1{font-family:'Pacifico',cursive;color:white;font-size:26px;text-shadow:0 2px 8px rgba(0,0,0,0.15);margin-bottom:2px}
+  .header .fecha{color:rgba(255,255,255,0.85);font-size:13px;font-weight:600}
+  .header .subtitulo{color:rgba(255,255,255,0.75);font-size:12px;margin-top:2px}
+  .btn-fecha{background:rgba(255,255,255,0.25);border:1.5px solid rgba(255,255,255,0.5);color:white;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:6px;display:inline-block}
+  
+  /* TABS */
+  .tabs{display:-webkit-flex;display:flex;background:white;position:fixed;bottom:0;left:0;right:0;z-index:100;border-top:2px solid var(--rosa);box-shadow:0 -4px 20px rgba(232,121,160,0.2);padding-bottom:env(safe-area-inset-bottom)}
+  .tab{-webkit-flex:1;flex:1;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;padding:8px 4px 10px;cursor:pointer;border:none;background:transparent;font-family:'Nunito',sans-serif;color:var(--texto-light);font-size:11px;font-weight:700;gap:2px;-webkit-transition:color 0.2s;transition:color 0.2s}
+  .tab.active{color:var(--rosa-deep)}
+  .tab .tab-icon{font-size:22px;-webkit-transition:-webkit-transform 0.2s;transition:transform 0.2s}
+  .tab.active .tab-icon{-webkit-transform:scale(1.15);transform:scale(1.15)}
+  .tab-indicator{position:absolute;top:0;left:0;right:0;height:3px;background:var(--rosa-deep);border-radius:0 0 3px 3px;opacity:0;-webkit-transition:opacity 0.2s;transition:opacity 0.2s}
+  .tab.active .tab-indicator{opacity:1}
+
+  /* PAGES */
+  .page{display:none;padding:16px}
+  .page.active{display:block;-webkit-animation:fadeIn 0.3s ease;animation:fadeIn 0.3s ease}
+  @-webkit-keyframes fadeIn{from{opacity:0;-webkit-transform:translateY(8px);transform:translateY(8px)}to{opacity:1;-webkit-transform:translateY(0);transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  /* CARDS */
+  .card{background:white;border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow);border:1.5px solid rgba(249,168,201,0.3)}
+  .card-title{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:8px;font-size:15px;font-weight:800;color:var(--texto);margin-bottom:14px}
+  .card-title .emoji{font-size:22px}
+
+  /* INPUTS */
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--texto-light);margin-bottom:6px;letter-spacing:0.3px}
+  .field input,.field textarea,.field select{width:100%;padding:11px 14px;border:2px solid var(--rosa);border-radius:14px;font-family:'Nunito',sans-serif;font-size:16px;color:var(--texto);background:var(--rosa-card);outline:none;-webkit-transition:border-color 0.2s,background 0.2s;transition:border-color 0.2s,background 0.2s;font-weight:600}
+  .field input:focus,.field textarea:focus{border-color:var(--rosa-deep);background:white;box-shadow:0 0 0 3px rgba(232,121,160,0.15)}
+  .field input[type=number]{-moz-appearance:textfield}
+  .field input[type=number]::-webkit-outer-spin-button,.field input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+  .field textarea{resize:none;height:70px;line-height:1.5}
+  .input-row{display:-webkit-flex;display:flex;gap:10px}
+  .input-row .field{-webkit-flex:1;flex:1}
+
+  /* STEPPER */
+  .stepper{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:0;background:var(--rosa-card);border:2px solid var(--rosa);border-radius:14px;overflow:hidden}
+  .stepper button{-webkit-appearance:none;appearance:none;background:transparent;border:none;font-size:22px;width:46px;height:46px;cursor:pointer;color:var(--rosa-deep);font-weight:800;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;-webkit-flex-shrink:0;flex-shrink:0;-webkit-transition:background 0.15s;transition:background 0.15s;touch-action:manipulation}
+  .stepper button:active{background:rgba(232,121,160,0.15)}
+  .stepper input{border:none!important;background:transparent!important;text-align:center;flex:1;padding:0!important;font-size:16px!important;border-radius:0!important;box-shadow:none!important}
+
+  /* BADGE CHIPS */
+  .chip{display:-webkit-inline-flex;display:inline-flex;-webkit-align-items:center;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+  .chip-rosa{background:var(--rosa-soft);color:var(--rosa-deep)}
+  .chip-verde{background:var(--verde-soft);color:#2e7d32}
+  .chip-naranja{background:var(--naranja-soft);color:#e65100}
+  .chip-rojo{background:var(--rojo-soft);color:#c62828}
+
+  /* BOTONES */
+  .btn{display:block;width:100%;padding:14px;border-radius:16px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;border:none;cursor:pointer;-webkit-transition:-webkit-transform 0.2s;transition:transform 0.2s;text-align:center}
+  .btn:active{-webkit-transform:scale(0.97);transform:scale(0.97)}
+  .btn-primary{background:linear-gradient(135deg,#e879a0,#f472b6);color:white;box-shadow:0 4px 15px rgba(232,121,160,0.4)}
+  .btn-danger{background:var(--rojo-soft);color:var(--rojo);border:2px solid var(--rojo)}
+  .btn-sm{padding:8px 16px;width:auto;font-size:13px;border-radius:12px;display:inline-block}
+
+  /* GASTOS LIST */
+  .gasto-item{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:10px;padding:10px 12px;background:var(--rosa-card);border-radius:12px;margin-bottom:8px;border:1px solid rgba(249,168,201,0.4)}
+  .gasto-item .gasto-desc{-webkit-flex:1;flex:1;font-size:13px;font-weight:700;color:var(--texto)}  .gasto-item .gasto-monto{font-size:14px;font-weight:800;color:var(--rosa-deep)}
+  .gasto-item .del-btn{background:none;border:none;cursor:pointer;font-size:18px;padding:2px;opacity:0.6}
+  .gasto-item .del-btn:active{opacity:1}
+
+  /* SUMMARY CARDS */
+  .stat-grid{display:-ms-grid;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .stat-card{background:white;border-radius:16px;padding:14px;text-align:center;border:1.5px solid rgba(249,168,201,0.3);box-shadow:0 2px 12px rgba(232,121,160,0.1)}
+  .stat-card.ganancia{background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border-color:#a5d6a7}
+  .stat-card.perdida{background:linear-gradient(135deg,#fdecea,#fce4ec);border-color:#ef9a9a}
+  .stat-val{font-size:22px;font-weight:800;margin-top:4px}
+  .stat-lbl{font-size:11px;font-weight:700;color:var(--texto-light);letter-spacing:0.5px;text-transform:uppercase}
+  .stat-card.ganancia .stat-val{color:#2e7d32}
+  .stat-card.perdida .stat-val{color:#c62828}
+
+  /* DESGLOSE */
+  .desglose-row{display:-webkit-flex;display:flex;-webkit-justify-content:space-between;justify-content:space-between;-webkit-align-items:center;align-items:center;padding:9px 0;border-bottom:1px dashed rgba(249,168,201,0.5);font-size:13px}
+  .desglose-row:last-child{border-bottom:none}
+  .desglose-row .lbl{color:var(--texto-light);font-weight:600}
+  .desglose-row .val{font-weight:800;color:var(--texto)}
+  .desglose-total{background:linear-gradient(135deg,#fde8f2,#fff0f7);border-radius:14px;padding:14px;display:-webkit-flex;display:flex;-webkit-justify-content:space-between;justify-content:space-between;-webkit-align-items:center;align-items:center;margin-top:10px;border:2px solid var(--rosa)}
+  .desglose-total .lbl{font-size:15px;font-weight:800;color:var(--texto)}
+  .desglose-total .val{font-size:20px;font-weight:800}
+
+  /* DATE PICKER MODAL */
+  .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:200;display:none;-webkit-align-items:flex-end;align-items:flex-end;-webkit-justify-content:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:white;border-radius:24px 24px 0 0;padding:24px 20px calc(36px + env(safe-area-inset-bottom));width:100%;max-width:500px;-webkit-animation:slideUp 0.3s ease;animation:slideUp 0.3s ease}
+  @-webkit-keyframes slideUp{from{-webkit-transform:translateY(100%);transform:translateY(100%)}to{-webkit-transform:translateY(0);transform:translateY(0)}}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal h3{font-size:17px;font-weight:800;color:var(--texto);margin-bottom:16px;text-align:center}
+  .modal input[type=date]{width:100%;padding:12px;border:2px solid var(--rosa);border-radius:14px;font-size:16px;font-family:'Nunito',sans-serif;color:var(--texto);background:var(--rosa-card);outline:none;font-weight:600}
+  .modal .modal-btns{display:-webkit-flex;display:flex;gap:10px;margin-top:16px}
+  .modal .modal-btns button{flex:1;padding:13px;border-radius:14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;border:none}
+  .modal .cancel-btn{background:var(--rosa-soft);color:var(--rosa-deep)}
+  .modal .ok-btn{background:linear-gradient(135deg,#e879a0,#f472b6);color:white}
+
+  /* EMPTY STATE */
+  .empty{text-align:center;padding:24px 16px;color:var(--texto-light);font-size:13px;font-weight:600}
+  .empty .empty-icon{font-size:36px;margin-bottom:8px}
+
+  /* CHART */
+  .chart-wrap{background:white;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);border:1.5px solid rgba(249,168,201,0.3)}
+  .chart-title{font-size:14px;font-weight:800;color:var(--texto);margin-bottom:12px;display:-webkit-flex;display:flex;align-items:center;gap:6px}
+
+  /* PROGRESS BAR */
+  .progress-wrap{margin-bottom:6px}
+  .progress-lbl{display:-webkit-flex;display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px}
+  .progress-bar{height:10px;background:#f5e0eb;border-radius:10px;overflow:hidden}
+  .progress-fill{height:100%;border-radius:10px;-webkit-transition:width 0.5s ease;transition:width 0.5s ease}
+
+  /* TOAST */
+  .toast{position:fixed;top:20px;left:50%;-webkit-transform:translateX(-50%) translateY(-80px);transform:translateX(-50%) translateY(-80px);background:linear-gradient(135deg,#e879a0,#f472b6);color:white;padding:12px 24px;border-radius:20px;font-weight:700;font-size:14px;z-index:300;-webkit-transition:-webkit-transform 0.3s ease;transition:transform 0.3s ease;white-space:nowrap;box-shadow:0 4px 20px rgba(232,121,160,0.4)}
+  .toast.show{-webkit-transform:translateX(-50%) translateY(0);transform:translateX(-50%) translateY(0)}
+
+  /* SAVE INDICATOR */
+  .save-dot{width:8px;height:8px;border-radius:50%;background:#7bc67e;display:inline-block;margin-right:4px;-webkit-animation:pulse 2s infinite;animation:pulse 2s infinite}
+  @-webkit-keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+  /* DIVIDER */
+  .divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--texto-light);font-size:12px;font-weight:700}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(249,168,201,0.5)}
+
+  .mt-1{margin-top:6px} .mt-2{margin-top:12px}
+  .text-sm{font-size:12px} .text-muted{color:var(--texto-light)}
+  .fw-800{font-weight:800}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ Guardado</div>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>🧁 Mis Pastelitos</h1>
+  <div class="fecha" id="fechaDisplay">Cargando fecha...</div>
+  <div class="subtitulo"><span class="save-dot"></span>Auto-guardado activado</div>
+  <button class="btn-fecha" onclick="openModal()">📅 Cambiar día</button>
+</div>
+
+<!-- MODAL FECHA -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>📅 Seleccionar día</h3>
+    <input type="date" id="dateInput">
+    <div class="modal-btns">
+      <button class="cancel-btn" onclick="closeModal()">Cancelar</button>
+      <button class="ok-btn" onclick="setDate()">✓ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGES -->
+<div class="page active" id="page-manana">
+  <div class="card">
+    <div class="card-title"><span class="emoji">🌅</span> Producción de la Mañana</div>
+    <div class="field">
+      <label>Bandejas fritas hoy</label>
+      <div class="stepper">
+        <button onclick="step('bandejas',-1)">−</button>
+        <input type="number" id="bandejas" value="0" min="0" oninput="save()">
+        <button onclick="step('bandejas',1)">+</button>
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="field">
+        <label>Pastelitos por bandeja</label>
+        <input type="number" id="porBandeja" value="12" min="1" oninput="save()">
+      </div>
+      <div class="field">
+        <label>Precio unitario ($)</label>
+        <input type="number" id="precio" value="0.25" step="0.05" min="0" oninput="save()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Costo de materiales ($) <span class="text-muted text-sm">(harina, aceite...)</span></label>
+      <input type="number" id="costoMat" value="0" step="0.01" min="0" oninput="save()">
+    </div>
+    <div style="background:var(--rosa-soft);border-radius:14px;padding:14px;margin-top:6px">
+      <div class="desglose-row">
+        <span class="lbl">Total pastelitos producidos</span>
+        <span class="val" id="totalProducidos">0</span>
+      </div>
+      <div class="desglose-row">
+        <span class="lbl">Venta potencial</span>
+        <span class="val" id="ventaPotencial">$0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="emoji">☕</span> Nota del día</div>
+    <div class="field">
+      <label>Observaciones de la mañana</label>
+      <textarea id="notaManana" placeholder="Ej: aceite nuevo, clima lluvioso..." oninput="save()"></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-dia">
+  <div class="card">
+    <div class="card-title"><span class="emoji">😋</span> Pastelitos que me comí</div>
+    <div class="field">
+      <label>Cantidad consumida</label>
+      <div class="stepper">
+        <button onclick="step('comidos',-1)">−</button>
+        <input type="number" id="comidos" value="0" min="0" oninput="save()">
+        <button onclick="step('comidos',1)">+</button>
+      </div>
+    </div>
+    <p class="text-sm text-muted mt-1">Estos no cuentan como venta</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="emoji">💧</span> Gasto de Agua</div>
+    <div class="field">
+      <label>Monto ($)</label>
+      <input type="number" id="gastoAgua" value="0" step="0.01" min="0" oninput="save()">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="emoji">📋</span> Otros Gastos del Día</div>
+    <div class="input-row">
+      <div class="field">
+        <label>Descripción</label>
+        <input type="text" id="newGastoDesc" placeholder="Ej: bolsas, servilletas...">
+      </div>
+      <div class="field">
+        <label>Monto ($)</label>
+        <input type="number" id="newGastoMonto" placeholder="0.00" step="0.01" min="0">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="addGasto('dia')">+ Agregar gasto</button>
+    <div id="gastos-dia-list" class="mt-2"></div>
+  </div>
+</div>
+
+<div class="page" id="page-tarde">
+  <div class="card">
+    <div class="card-title"><span class="emoji">🌆</span> Gastos de la Tarde</div>
+    <div class="input-row">
+      <div class="field">
+        <label>Descripción</label>
+        <input type="text" id="newGastoTardeDesc" placeholder="Ej: transporte...">
+      </div>
+      <div class="field">
+        <label>Monto ($)</label>
+        <input type="number" id="newGastoTardeMonto" placeholder="0.00" step="0.01" min="0">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="addGasto('tarde')">+ Agregar gasto</button>
+    <div id="gastos-tarde-list" class="mt-2"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="emoji">🧺</span> Cierre del Día</div>
+    <div class="field">
+      <label>Pastelitos que sobraron</label>
+      <div class="stepper">
+        <button onclick="step('sobrantes',-1)">−</button>
+        <input type="number" id="sobrantes" value="0" min="0" oninput="save()">
+        <button onclick="step('sobrantes',1)">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Nota de cierre</label>
+      <textarea id="notaTarde" placeholder="Ej: buen día, mucha gente en la tarde..." oninput="save()"></textarea>
+    </div>
+    <div style="background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border-radius:14px;padding:14px;margin-top:6px;border:1.5px solid #a5d6a7">
+      <div class="desglose-row">
+        <span class="lbl">Producidos</span>
+        <span class="val" id="r-producidos">0</span>
+      </div>
+      <div class="desglose-row">
+        <span class="lbl">Comidos</span>
+        <span class="val" id="r-comidos">0</span>
+      </div>
+      <div class="desglose-row">
+        <span class="lbl">Sobrantes</span>
+        <span class="val" id="r-sobrantes">0</span>
+      </div>
+      <div class="desglose-row" style="border-bottom:none;padding-bottom:0">
+        <span class="lbl fw-800">✅ Vendidos</span>
+        <span class="val" style="color:#2e7d32;font-size:18px" id="r-vendidos">0</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-resumen">
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-lbl">💰 Ingresos</div>
+      <div class="stat-val" style="color:var(--rosa-deep)" id="s-ingresos">$0.00</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-lbl">📉 Gastos</div>
+      <div class="stat-val" style="color:var(--rojo)" id="s-gastos">$0.00</div>
+    </div>
+  </div>
+  <div class="stat-card ganancia" id="gananciaCard" style="margin-bottom:14px;padding:18px">
+    <div class="stat-lbl" id="gananciaLbl">🎉 Ganancia del día</div>
+    <div class="stat-val" id="s-ganancia">$0.00</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="emoji">📊</span> Desglose</div>
+    <div class="desglose-row">
+      <span class="lbl">🧁 Vendidos × precio</span>
+      <span class="val" id="d-ventas">$0.00</span>
+    </div>
+    <div class="desglose-row">
+      <span class="lbl">🛒 Materiales</span>
+      <span class="val" id="d-mat">−$0.00</span>
+    </div>
+    <div class="desglose-row">
+      <span class="lbl">💧 Agua</span>
+      <span class="val" id="d-agua">−$0.00</span>
+    </div>
+    <div class="desglose-row">
+      <span class="lbl">📋 Gastos del día</span>
+      <span class="val" id="d-gdia">−$0.00</span>
+    </div>
+    <div class="desglose-row">
+      <span class="lbl">🌆 Gastos tarde</span>
+      <span class="val" id="d-gtarde">−$0.00</span>
+    </div>
+    <div class="desglose-total">
+      <span class="lbl">TOTAL NETO</span>
+      <span class="val" id="d-total" style="color:var(--rosa-deep)">$0.00</span>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">📦 Distribución de Pastelitos</div>
+    <div style="max-height:220px;display:flex;justify-content:center">
+      <canvas id="pieChart" style="max-height:200px"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="emoji">🎯</span> Métricas del día</div>
+    <div class="progress-wrap">
+      <div class="progress-lbl">
+        <span>% Vendido</span>
+        <span id="pct-vendido">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="bar-vendido" style="width:0%;background:linear-gradient(90deg,#e879a0,#f9a8c9)"></div></div>
+    </div>
+    <div class="mt-1 progress-wrap">
+      <div class="progress-lbl">
+        <span>% Consumido</span>
+        <span id="pct-comido">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="bar-comido" style="width:0%;background:linear-gradient(90deg,#ffb347,#ffd580)"></div></div>
+    </div>
+    <div class="mt-1 progress-wrap">
+      <div class="progress-lbl">
+        <span>% Sobrante</span>
+        <span id="pct-sobre">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="bar-sobre" style="width:0%;background:linear-gradient(90deg,#b39ddb,#d1c4e9)"></div></div>
+    </div>
+
+    <div class="divider">estadísticas</div>
+    <div class="desglose-row">
+      <span class="lbl">Ganancia por pastelito vendido</span>
+      <span class="val" id="ganPorUnidad">$0.00</span>
+    </div>
+    <div class="desglose-row">
+      <span class="lbl">Total gastos del día</span>
+      <span class="val" id="totalGastosStat">$0.00</span>
+    </div>
+    <div class="desglose-row">
+      <span class="lbl">Pastelitos vendidos</span>
+      <span class="val" id="vendidosStat">0</span>
+    </div>
+  </div>
+
+  <button class="btn btn-danger mt-2" onclick="confirmReset()">🗑️ Limpiar datos del día</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="goTo('manana',0)">
+    <div class="tab-indicator"></div>
+    <span class="tab-icon">🌅</span>
+    Mañana
+  </button>
+  <button class="tab" onclick="goTo('dia',1)">
+    <div class="tab-indicator"></div>
+    <span class="tab-icon">☀️</span>
+    Día
+  </button>
+  <button class="tab" onclick="goTo('tarde',2)">
+    <div class="tab-indicator"></div>
+    <span class="tab-icon">🌆</span>
+    Tarde
+  </button>
+  <button class="tab" onclick="goTo('resumen',3)">
+    <div class="tab-indicator"></div>
+    <span class="tab-icon">📊</span>
+    Resumen
+  </button>
+</div>
+
+<script>
+let currentDate = new Date().toISOString().split('T')[0];
+let gastosData = {dia:[],tarde:[]};
+let pieChart = null;
+
+function getKey(){return 'pastelitos_'+currentDate}
+
+function getDayName(dateStr){
+  const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const d=new Date(dateStr+'T12:00:00');
+  return days[d.getDay()]+', '+d.getDate()+' de '+months[d.getMonth()]+' '+d.getFullYear();
+}
+
+function updateHeader(){
+  document.getElementById('fechaDisplay').textContent=getDayName(currentDate);
+}
+
+function openModal(){
+  document.getElementById('dateInput').value=currentDate;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
+function setDate(){
+  currentDate=document.getElementById('dateInput').value;
+  updateHeader();
+  closeModal();
+  loadData();
+}
+
+function step(id,delta){
+  const el=document.getElementById(id);
+  const val=Math.max(0,(parseInt(el.value)||0)+delta);
+  el.value=val;
+  save();
+}
+
+function save(){
+  const data={
+    bandejas:parseInt(document.getElementById('bandejas').value)||0,
+    porBandeja:parseInt(document.getElementById('porBandeja').value)||12,
+    precio:parseFloat(document.getElementById('precio').value)||0,
+    costoMat:parseFloat(document.getElementById('costoMat').value)||0,
+    comidos:parseInt(document.getElementById('comidos').value)||0,
+    gastoAgua:parseFloat(document.getElementById('gastoAgua').value)||0,
+    sobrantes:parseInt(document.getElementById('sobrantes').value)||0,
+    notaManana:document.getElementById('notaManana').value,
+    notaTarde:document.getElementById('notaTarde').value,
+    gastosDia:gastosData.dia,
+    gastosTarde:gastosData.tarde
+  };
+  localStorage.setItem(getKey(),JSON.stringify(data));
+  calcular(data);
+}
+
+function loadData(){
+  const raw=localStorage.getItem(getKey());
+  const data=raw?JSON.parse(raw):{
+    bandejas:0,porBandeja:12,precio:0.25,costoMat:0,
+    comidos:0,gastoAgua:0,sobrantes:0,
+    notaManana:'',notaTarde:'',gastosDia:[],gastosTarde:[]
+  };
+  document.getElementById('bandejas').value=data.bandejas||0;
+  document.getElementById('porBandeja').value=data.porBandeja||12;
+  document.getElementById('precio').value=data.precio||0.25;
+  document.getElementById('costoMat').value=data.costoMat||0;
+  document.getElementById('comidos').value=data.comidos||0;
+  document.getElementById('gastoAgua').value=data.gastoAgua||0;
+  document.getElementById('sobrantes').value=data.sobrantes||0;
+  document.getElementById('notaManana').value=data.notaManana||'';
+  document.getElementById('notaTarde').value=data.notaTarde||'';
+  gastosData.dia=data.gastosDia||[];
+  gastosData.tarde=data.gastosTarde||[];
+  renderGastos('dia');
+  renderGastos('tarde');
+  calcular(data);
+}
+
+function calcular(data){
+  const total=(data.bandejas||0)*(data.porBandeja||12);
+  const vendidos=Math.max(0,total-(data.comidos||0)-(data.sobrantes||0));
+  const ingresos=vendidos*(data.precio||0);
+  const totalGDia=(gastosData.dia||[]).reduce((s,g)=>s+g.monto,0);
+  const totalGTarde=(gastosData.tarde||[]).reduce((s,g)=>s+g.monto,0);
+  const gastosTotales=(data.costoMat||0)+(data.gastoAgua||0)+totalGDia+totalGTarde;
+  const ganancia=ingresos-gastosTotales;
+
+  // Mañana
+  document.getElementById('totalProducidos').textContent=total;
+  document.getElementById('ventaPotencial').textContent='$'+ingresos.toFixed(2);
+
+  // Tarde resumen
+  document.getElementById('r-producidos').textContent=total;
+  document.getElementById('r-comidos').textContent=data.comidos||0;
+  document.getElementById('r-sobrantes').textContent=data.sobrantes||0;
+  document.getElementById('r-vendidos').textContent=vendidos;
+
+  // Resumen
+  document.getElementById('s-ingresos').textContent='$'+ingresos.toFixed(2);
+  document.getElementById('s-gastos').textContent='$'+gastosTotales.toFixed(2);
+  document.getElementById('s-ganancia').textContent='$'+Math.abs(ganancia).toFixed(2);
+  const gCard=document.getElementById('gananciaCard');
+  const gLbl=document.getElementById('gananciaLbl');
+  if(ganancia<0){gCard.classList.remove('ganancia');gCard.classList.add('perdida');gLbl.textContent='😟 Pérdida del día'}
+  else{gCard.classList.add('ganancia');gCard.classList.remove('perdida');gLbl.textContent='🎉 Ganancia del día'}
+
+  document.getElementById('d-ventas').textContent='$'+ingresos.toFixed(2);
+  document.getElementById('d-mat').textContent='−$'+(data.costoMat||0).toFixed(2);
+  document.getElementById('d-agua').textContent='−$'+(data.gastoAgua||0).toFixed(2);
+  document.getElementById('d-gdia').textContent='−$'+totalGDia.toFixed(2);
+  document.getElementById('d-gtarde').textContent='−$'+totalGTarde.toFixed(2);
+  document.getElementById('d-total').textContent=(ganancia>=0?'':'−')+'$'+Math.abs(ganancia).toFixed(2);
+  document.getElementById('d-total').style.color=ganancia>=0?'#2e7d32':'#c62828';
+
+  // Stats
+  const pVend=total>0?Math.round(vendidos/total*100):0;
+  const pCom=total>0?Math.round((data.comidos||0)/total*100):0;
+  const pSob=total>0?Math.round((data.sobrantes||0)/total*100):0;
+  document.getElementById('pct-vendido').textContent=pVend+'%';
+  document.getElementById('pct-comido').textContent=pCom+'%';
+  document.getElementById('pct-sobre').textContent=pSob+'%';
+  document.getElementById('bar-vendido').style.width=pVend+'%';
+  document.getElementById('bar-comido').style.width=pCom+'%';
+  document.getElementById('bar-sobre').style.width=pSob+'%';
+  const ganPU=vendidos>0?ganancia/vendidos:0;
+  document.getElementById('ganPorUnidad').textContent='$'+ganPU.toFixed(2);
+  document.getElementById('totalGastosStat').textContent='$'+gastosTotales.toFixed(2);
+  document.getElementById('vendidosStat').textContent=vendidos;
+
+  // Pie chart
+  updatePie(vendidos,data.comidos||0,data.sobrantes||0);
+}
+
+function updatePie(vendidos,comidos,sobrantes){
+  const ctx=document.getElementById('pieChart').getContext('2d');
+  if(pieChart)pieChart.destroy();
+  const total=vendidos+comidos+sobrantes;
+  if(total===0){pieChart=null;return}
+  pieChart=new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:['Vendidos','Comidos','Sobrantes'],
+      datasets:[{data:[vendidos,comidos,sobrantes],backgroundColor:['#e879a0','#ffb347','#b39ddb'],borderWidth:2,borderColor:'white'}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:true,cutout:'60%',
+      plugins:{legend:{position:'bottom',labels:{font:{family:'Nunito',size:12,weight:'700'},padding:12}}}
+    }
+  });
+}
+
+function addGasto(tipo){
+  const descId=tipo==='dia'?'newGastoDesc':'newGastoTardeDesc';
+  const montoId=tipo==='dia'?'newGastoMonto':'newGastoTardeMonto';
+  const desc=document.getElementById(descId).value.trim();
+  const monto=parseFloat(document.getElementById(montoId).value)||0;
+  if(!desc||monto<=0){showToast('⚠️ Ingresa descripción y monto');return}
+  gastosData[tipo].push({id:Date.now(),desc,monto});
+  document.getElementById(descId).value='';
+  document.getElementById(montoId).value='';
+  renderGastos(tipo);
+  save();
+  showToast('✅ Gasto agregado');
+}
+
+function renderGastos(tipo){
+  const listId='gastos-'+tipo+'-list';
+  const list=document.getElementById(listId);
+  const items=gastosData[tipo];
+  if(items.length===0){list.innerHTML='<div class="empty"><div class="empty-icon">📋</div>Sin gastos registrados</div>';return}
+  list.innerHTML=items.map(g=>`
+    <div class="gasto-item">
+      <div class="gasto-desc">${g.desc}</div>
+      <div class="gasto-monto">$${g.monto.toFixed(2)}</div>
+      <button class="del-btn" onclick="delGasto('${tipo}',${g.id})">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function delGasto(tipo,id){
+  gastosData[tipo]=gastosData[tipo].filter(g=>g.id!==id);
+  renderGastos(tipo);
+  save();
+}
+
+function goTo(page,idx){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  if(page==='resumen')calcular({
+    bandejas:parseInt(document.getElementById('bandejas').value)||0,
+    porBandeja:parseInt(document.getElementById('porBandeja').value)||12,
+    precio:parseFloat(document.getElementById('precio').value)||0,
+    costoMat:parseFloat(document.getElementById('costoMat').value)||0,
+    comidos:parseInt(document.getElementById('comidos').value)||0,
+    gastoAgua:parseFloat(document.getElementById('gastoAgua').value)||0,
+    sobrantes:parseInt(document.getElementById('sobrantes').value)||0
+  });
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function confirmReset(){
+  if(confirm('¿Limpiar todos los datos de hoy?\nEsta acción no se puede deshacer.')){
+    localStorage.removeItem(getKey());
+    gastosData={dia:[],tarde:[]};
+    loadData();
+    showToast('🗑️ Datos limpiados');
+  }
+}
+
+// Init
+updateHeader();
+loadData();
+
+// Auto-save all inputs
+document.querySelectorAll('input,textarea').forEach(el=>{
+  if(el.id&&['bandejas','porBandeja','precio','costoMat','comidos','gastoAgua','sobrantes','notaManana','notaTarde'].includes(el.id)){
+    el.addEventListener('input',save);
+  }
+});
+</script>
+</body>
+</html>
